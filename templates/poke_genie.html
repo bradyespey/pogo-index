@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Pokémon Go Index - Poke Genie{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mt-4 text-center">Poke Genie Data</h2>
+    <p class="text-center">This page automatically updates with the latest data from Poke Genie uploaded CSVs.</p>
+
+    <!-- Filter row above the table -->
+    <div class="row mb-3">
+        <!-- Name Search -->
+        <div class="col-md-6">
+            <label for="searchName">Name:</label>
+            <input type="text" id="searchName" class="form-control" placeholder="Search Name">
+        </div>
+
+        <!-- Show entries selector -->
+        <div class="col-md-6">
+            <label for="showEntries">Show entries:</label>
+            <select id="showEntries" class="form-control">
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Reset All button -->
+    <div class="mb-3">
+        <button id="resetFiltersButton" class="btn btn-warning">Reset All</button>
+    </div>
+
+    <!-- Table for Poke Genie Data -->
+    <div class="table-responsive">
+        <table id="pokeGenieTable" class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Form</th>
+                    <th>Pokémon Number</th>
+                    <th>Gender</th>
+                    <th>CP</th>
+                    <th>Quick Move</th>
+                    <th>Charge Move</th>
+                    <th>Charge Move 2</th>
+                    <th>Scan Date</th>
+                    <th>Original Scan Date</th>
+                    <th>Catch Date</th>
+                    <th>Lucky</th>
+                    <th>Shadow/Purified</th>
+                    <th>Favorite</th>
+                    <th>Name (G)</th>
+                    <th>Name (U)</th>
+                    <th>Name (L)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in poke_genie_data %}
+                <tr>
+                    <td>{{ entry.index }}</td>
+                    <td>{{ entry.name }}</td>
+                    <td>{{ entry.form }}</td>
+                    <td>{{ entry.pokemon_number }}</td>
+                    <td>{{ entry.gender }}</td>
+                    <td>{{ entry.cp }}</td>
+                    <td>{{ entry.quick_move }}</td>
+                    <td>{{ entry.charge_move }}</td>
+                    <td>{{ entry.charge_move_2 }}</td>
+                    <td>{{ entry.scan_date }}</td>
+                    <td>{{ entry.original_scan_date }}</td>
+                    <td>{{ entry.catch_date }}</td>
+                    <td>{{ 'Yes' if entry.lucky|int == 1 else 'No' }}</td>
+                    <td>
+                        {% set shadow_purified = entry.shadow_purified|int %}
+                        {% if shadow_purified == 0 %}
+                            Regular
+                        {% elif shadow_purified == 1 %}
+                            Shadow
+                        {% elif shadow_purified == 2 %}
+                            Purified
+                        {% else %}
+                            Unknown
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% set favorites = {0: 'Normal', 1: 'Shiny', 2: 'Costume', 3: 'Shiny Costume', 4: 'iPad Need', 5: 'Extras'} %}
+                        {{ favorites.get(entry.favorite|int, 'Unknown') }}
+                    </td>
+                    <td>{{ entry.name_g }}</td>
+                    <td>{{ entry.name_u }}</td>
+                    <td>{{ entry.name_l }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

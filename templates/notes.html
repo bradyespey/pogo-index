@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Pokémon Go Index - Notes{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mt-4 text-center">Notes Data</h2>
+    <p class="text-center">This page allows you to view and search through Pokémon notes.</p>
+
+    <!-- Filter row above the table -->
+    <div class="row mb-3">
+        <!-- Name Search -->
+        <div class="col-md-6">
+            <label for="searchName">Name:</label>
+            <input type="text" id="searchName" class="form-control" placeholder="Search Name">
+        </div>
+
+        <!-- Note Search -->
+        <div class="col-md-6">
+            <label for="searchNote">Note:</label>
+            <input type="text" id="searchNote" class="form-control" placeholder="Search Note">
+        </div>
+    </div>
+
+    <!-- Show entries selector and Reset All button -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="showEntries">Show entries:</label>
+            <select id="showEntries" class="form-control">
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+        <div class="col-md-6 d-flex align-items-end">
+            <button id="resetFiltersButton" class="btn btn-warning mt-2">Reset All</button>
+        </div>
+    </div>
+
+    <!-- Table for Notes -->
+    <div class="table-responsive">
+        <table id="notesTable" class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for note, pokemon_name in notes_data %}
+                    {% if note.note_text.strip() %}
+                    <tr>
+                        <td>{{ note.pokemon_id }}</td>
+                        <td>{{ pokemon_name }}</td>
+                        <td>{{ note.note_text }}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

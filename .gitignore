@@ -1,0 +1,51 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+
+# Log files
+logs/
+*.log
+
+# Environment variables
+.env
+
+# API credentials
+api_credentials.json
+
+# Python virtual environment
+venv/
+ENV/
+env/
+
+# macOS-specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Ignore compiled scripts
+*.exe
+*.out
+*.app
+
+# Ignore backup files
+*.bak
+*.swp
+
+# Ignore any files related to IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Exclude cloud sync files (Google Drive, etc.)
+*.gdlink
+*.sync-conflict*
+
+# Ignore scan.txt files
+*scan.txt

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Pokémon Go Index - Team Rocket{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mt-4 text-center">Team Rocket Pokémon List</h2>
+    <p class="text-center">
+        This page automatically updates with all Team Rocket Pokémon from
+        <a href="https://www.serebii.net/pokemongo/shadowpokemon.shtml" target="_blank">Serebii.net</a>.
+    </p>
+
+    <!-- Filter row above the table -->
+    <div class="row mb-3">
+        <!-- Name Search -->
+        <div class="col-md-6">
+            <label for="searchName">Name:</label>
+            <input type="text" id="searchName" class="form-control" placeholder="Search Name">
+        </div>
+
+        <!-- Show entries selector -->
+        <div class="col-md-6">
+            <label for="showEntries">Show entries:</label>
+            <select id="showEntries" class="form-control">
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Reset All button -->
+    <div class="mb-3">
+        <button id="resetFiltersButton" class="btn btn-warning">Reset All</button>
+    </div>
+
+    <!-- Table for Rocket Pokémon -->
+    <div class="table-responsive">
+        <table id="rocketTable" class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Shadow Living Dex</th>
+                    <th>Purified Living Dex</th>
+                    <th>Method</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rocket_pokemon in rocket_data %}
+                <tr>
+                    <td>{{ rocket_pokemon.dex_number }}</td>
+                    <td>{{ rocket_pokemon.name }}</td>
+                    <td>{{ rocket_pokemon.shadow_living_dex }}</td>
+                    <td>{{ rocket_pokemon.purified_living_dex }}</td>
+                    <td>{{ rocket_pokemon.method }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
