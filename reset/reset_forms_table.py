@@ -1,38 +1,32 @@
-import sqlite3
+import sys
+from pathlib import Path
 
-# Path to your SQLite database
-db_path = "C:/Projects/GitHub/PoGO/pogo.db"
+# Add the root directory to sys.path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-def drop_table():
-    """Drop the 'forms' table if it exists."""
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute("DROP TABLE IF EXISTS forms;")
-    conn.commit()
-    conn.close()
-    print("Table 'forms' dropped.")
+# Now we import app and db inside the functions to avoid any circular import issues
+def drop_forms_table():
+    """Drop the 'forms' table from the PostgreSQL database."""
+    from app import app, db  # Import app and db locally
+    with app.app_context():
+        db.drop_all()  # Drop all tables including 'forms'
+        db.session.commit()
+        print("Dropped all tables.")
 
-def create_table():
-    """Create the 'forms' table."""
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-
-    cursor.execute('''
-        CREATE TABLE forms (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            dex_number INTEGER NOT NULL,
-            name TEXT NOT NULL,
-            form TEXT
-        );
-    ''')
-
-    conn.commit()
-    conn.close()
-    print("Table 'forms' created.")
+def recreate_forms_table():
+    """Recreate the 'forms' table using SQLAlchemy."""
+    from app import app, db  # Import app and db locally
+    with app.app_context():
+        db.create_all()  # Recreate all tables, including the updated 'forms' table
+        db.session.commit()
+        print("Recreated all tables.")
 
 def main():
-    drop_table()
-    create_table()
+    # Drop the existing 'forms' table
+    drop_forms_table()
+
+    # Recreate the 'forms' table with the new fields
+    recreate_forms_table()
 
 if __name__ == "__main__":
     main()

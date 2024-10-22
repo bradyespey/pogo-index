@@ -1,77 +1,74 @@
+import os
+import sys
+from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
-import sqlite3
+import time
 
-# Path to your SQLite database
-db_path = "C:/Projects/GitHub/PoGO/pogo.db"
+# Add the project root directory to the system path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-def sanitize_string(value):
-    """Remove or replace special characters that cause encoding issues."""
-    if value:
-        return value.encode('ascii', 'ignore').decode()
-    return None
+# Now, you can import app and models after sys.path is correctly set
+from app import app, db
+from models import ShinyPokemon
 
-def fetch_shiny_pokemon_data():
-    """Fetch shiny Pokémon data from Serebii and update the SQLite database."""
-    url = "https://www.serebii.net/pokemongo/shiny.shtml"
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
+def fetch_shiny_pokemon_data(app_context):
+    with app_context:
+        print("Fetching and updating Shiny Pokémon data...")
 
-    # Find the second table on the page
-    table = soup.find_all("table")[1]
-    rows = table.find_all("tr")[1:]
+        url = "https://www.serebii.net/pokemongo/shiny.shtml"
+        start_time = time.time()
+        print(f"Fetching data from {url}...")
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        print(f"Fetched data in {time.time() - start_time:.2f} seconds")
 
-    # Connect to the SQLite database
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
+        # Parse the HTML table
+        table = soup.find_all("table")[1]
+        rows = table.find_all("tr")[1:]  # Skip the header row
+        total_shinies = len(rows)
+        print(f"Found {total_shinies} Shiny Pokémon in the data.")
 
-    count_updated = 0
-    count_inserted = 0
-    total_pokemon = len(rows)
+        count_inserted, count_updated, count_skipped = 0, 0, 0
 
-    # Process the rows and count updates and inserts
-    for row in rows:
-        cols = row.find_all("td", recursive=False)
+        # Process each Shiny Pokémon
+        for idx, row in enumerate(rows):
+            cols = row.find_all("td", recursive=False)
 
-        # Skip rows that do not contain enough columns
-        if len(cols) < 5:
-            continue
+            if len(cols) < 5:
+                continue
 
-        dex_number_raw = cols[0].get_text(strip=True)
-        dex_number = int(dex_number_raw.replace('#', ''))
-        name = sanitize_string(cols[2].get_text(strip=True))
-        method = sanitize_string(cols[4].get_text(strip=True))
+            dex_number = int(cols[0].get_text(strip=True).replace('#', ''))
+            name = cols[2].get_text(strip=True)
+            method = cols[4].get_text(strip=True)
 
-        # Check if the shiny Pokémon entry already exists
-        cursor.execute("SELECT * FROM shinies WHERE dex_number = ? AND name = ?", (dex_number, name))
-        existing_entry = cursor.fetchone()
+            # Check if the Shiny entry already exists
+            shiny_pokemon = ShinyPokemon.query.filter_by(dex_number=dex_number, name=name).first()
 
-        if existing_entry:
-            # Update the existing entry
-            cursor.execute('''
-                UPDATE shinies
-                SET method = ?
-                WHERE dex_number = ? AND name = ?
-            ''', (method, dex_number, name))
-            count_updated += 1
-        else:
-            # Insert a new entry
-            cursor.execute('''
-                INSERT INTO shinies (dex_number, name, method)
-                VALUES (?, ?, ?)
-            ''', (dex_number, name, method))
-            count_inserted += 1
+            if shiny_pokemon:
+                if shiny_pokemon.method != method:
+                    shiny_pokemon.method = method
+                    db.session.commit()
+                    count_updated += 1
+                else:
+                    count_skipped += 1
+            else:
+                new_shiny = ShinyPokemon(dex_number=dex_number, name=name, method=method)
+                db.session.add(new_shiny)
+                db.session.commit()
+                count_inserted += 1
 
-    # Commit the changes and close the connection
-    conn.commit()
-    conn.close()
+            # Log progress every 10 Pokémon
+            if idx % 10 == 0:
+                print(f"Processing Shiny Pokémon {idx + 1}/{total_shinies}...")
 
-    # Summary output
-    print(f"Finished fetching and saving Shiny Pokémon data.")
-    print(f"Total shiny Pokémon processed: {total_pokemon}")
-    print(f"Total shiny Pokémon added: {count_inserted}")
-    print(f"Total shiny Pokémon updated: {count_updated}")
+        # Final output
+        print(f"Finished processing {total_shinies} Shiny Pokémon.")
+        print(f"Total Shiny Pokémon added: {count_inserted}")
+        print(f"Total Shiny Pokémon updated: {count_updated}")
+        print(f"Total Shiny Pokémon skipped: {count_skipped}")
 
 if __name__ == "__main__":
-    fetch_shiny_pokemon_data()
-    
+    from app import app
+    with app.app_context():
+        fetch_shiny_pokemon_data(app.app_context())

@@ -1,39 +1,32 @@
-import sqlite3
+import sys
+from pathlib import Path
 
-# Path to your SQLite database
-db_path = "C:/Projects/GitHub/PoGO/pogo.db"
+# Add the root directory to sys.path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-def drop_table():
-    """Drop the 'rocket' table if it exists."""
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute("DROP TABLE IF EXISTS rocket;")
-    conn.commit()
-    conn.close()
-    print("Table 'rocket' dropped.")
+# Now we import app and db inside the functions to avoid any circular import issues
+def drop_rocket_table():
+    """Drop the 'rocket' table from the PostgreSQL database."""
+    from app import app, db  # Import app and db locally
+    with app.app_context():
+        db.drop_all()  # Drop all tables including 'rocket'
+        db.session.commit()
+        print("Dropped all tables.")
 
-def create_table():
-    """Create the 'rocket' table."""
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-
-    # Create the 'rocket' table with the correct schema
-    cursor.execute('''
-        CREATE TABLE rocket (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            dex_number INTEGER NOT NULL,
-            name TEXT NOT NULL,
-            method TEXT  -- Make sure the method column is here
-        );
-    ''')
-
-    conn.commit()
-    conn.close()
-    print("Table 'rocket' created.")
+def recreate_rocket_table():
+    """Recreate the 'rocket' table using SQLAlchemy."""
+    from app import app, db  # Import app and db locally
+    with app.app_context():
+        db.create_all()  # Recreate all tables, including the updated 'rocket' table
+        db.session.commit()
+        print("Recreated all tables.")
 
 def main():
-    drop_table()  # Optionally drop the table if you want to reset it
-    create_table()
+    # Drop the existing 'rocket' table
+    drop_rocket_table()
+
+    # Recreate the 'rocket' table with the new fields
+    recreate_rocket_table()
 
 if __name__ == "__main__":
     main()

@@ -1,59 +1,59 @@
+import os
+import sys
+from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
-import sqlite3
+import time
 
-# Path to your SQLite database
-db_path = "C:/Projects/GitHub/PoGO/pogo.db"
+# Add the project root directory to the system path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-def sanitize_string(value):
-    """Remove or replace special characters that cause encoding issues."""
-    if value:
-        return value.encode('ascii', 'ignore').decode()  # Remove non-ASCII characters
-    return None
+# Now, you can import app and models after sys.path is correctly set
+from app import app, db
+from models import Form
 
-def fetch_forms_data():
-    """Fetch Forms data and update the SQLite database."""
-    url = "https://pokemongo.fandom.com/wiki/List_of_Pok%C3%A9mon_with_different_forms"
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
+def fetch_forms_data(app_context):
+    with app_context:
+        print("Fetching and updating Pokémon Forms data...")
 
-    # Parse data appropriately (you'll need to adjust the logic based on the HTML structure)
-    forms_data = []  # List to hold parsed data (dex_number, name, form)
+        url = "https://pokemongo.fandom.com/wiki/List_of_Pok%C3%A9mon_with_different_forms"
+        start_time = time.time()
+        print(f"Fetching data from {url}...")
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        print(f"Fetched data in {time.time() - start_time:.2f} seconds")
 
-    # Replace the logic below with actual parsing based on the HTML structure of the page
-    # forms_data.append((dex_number, name, form))
+        # Parse the forms data
+        forms_data = []
 
-    # Connect to the SQLite database
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
+        # Add parsing logic based on HTML structure here, and populate forms_data
+        # For this example, let's assume we extract dex_number, name, form
+        # forms_data.append((dex_number, name, form))
 
-    for form_entry in forms_data:
-        dex_number, name, form = form_entry
+        count_inserted, count_updated, count_skipped = 0, 0, 0
 
-        # Check if the form entry already exists
-        cursor.execute("SELECT * FROM forms WHERE dex_number = ? AND name = ?", (dex_number, name))
-        existing_entry = cursor.fetchone()
+        for dex_number, name, form in forms_data:
+            existing_form = Form.query.filter_by(dex_number=dex_number, name=name).first()
 
-        if existing_entry:
-            # Update the existing entry
-            cursor.execute('''
-                UPDATE forms
-                SET form = ?
-                WHERE dex_number = ? AND name = ?
-            ''', (form, dex_number, name))
-            print(f"Updated {name} in the database.")
-        else:
-            # Insert a new entry
-            cursor.execute('''
-                INSERT INTO forms (dex_number, name, form)
-                VALUES (?, ?, ?)
-            ''', (dex_number, name, form))
-            print(f"Added {name} to the database.")
+            if existing_form:
+                if existing_form.form != form:
+                    existing_form.form = form
+                    db.session.commit()
+                    count_updated += 1
+                else:
+                    count_skipped += 1
+            else:
+                new_form = Form(dex_number=dex_number, name=name, form=form)
+                db.session.add(new_form)
+                db.session.commit()
+                count_inserted += 1
 
-    # Commit the changes and close the connection
-    conn.commit()
-    conn.close()
-    print("Finished fetching and saving Forms data.")
+        print(f"Total Forms processed: {len(forms_data)}")
+        print(f"Forms added: {count_inserted}")
+        print(f"Forms updated: {count_updated}")
+        print(f"Forms skipped: {count_skipped}")
 
 if __name__ == "__main__":
-    fetch_forms_data()
+    from app import app
+    with app.app_context():
+        fetch_forms_data(app.app_context())

@@ -1,63 +1,70 @@
 import os
+import sys
+from pathlib import Path
 import requests
-import sqlite3
+import time
 
-# Path to your SQLite database
-db_path = "C:/Projects/GitHub/PoGO/pogo.db"
+# Add the project root directory to the system path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-def fetch_and_update_specials():
-    """Fetch special Pokémon data from the URL and update the SQLite database."""
-    url = "https://gist.githubusercontent.com/Lusamine/a8604135b89dcfa840c61900c43df569/raw/7cdd446d7d13c9ea8cd385d630b29ceb550a1009/SV%25203.0.1%2520Legendary,%2520Mythical,%2520Sublegendary,%2520Ultra%2520Beast,%2520Paradox%2520Lists"
-    response = requests.get(url)
-    raw_data = response.text
+# Now, you can import app and models after sys.path is correctly set
+from app import app, db
+from models import SpecialsPokemon
 
-    # Split the raw data into different categories
-    categories = raw_data.split("\n\n")
+def fetch_and_update_specials(app_context):
+    with app_context:
+        print("Fetching and updating Special Pokémon data...")
 
-    # Connect to the SQLite database
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
+        url = "https://gist.githubusercontent.com/Lusamine/a8604135b89dcfa840c61900c43df569/raw/7cdd446d7d13c9ea8cd385d630b29ceb550a1009/SV%25203.0.1%2520Legendary,%2520Mythical,%2520Sublegendary,%2520Ultra%2520Beast,%2520Paradox%2520Lists"
+        start_time = time.time()
+        print(f"Fetching data from {url}...")
+        response = requests.get(url)
+        raw_data = response.text
+        print(f"Fetched data in {time.time() - start_time:.2f} seconds")
 
-    # Clear the existing records in the specials table
-    cursor.execute("DELETE FROM specials;")
-    conn.commit()
+        # Parse the raw data
+        categories = raw_data.split("\n\n")
+        total_categories = len(categories)
+        print(f"Found {total_categories} categories in the Special Pokémon data.")
 
-    row_count = 0
+        count_inserted, count_skipped = 0, 0
 
-    for category in categories:
-        lines = category.strip().split("\n")
-        if not lines:
-            continue
-
-        # The first line is the type (e.g., Legendary, Mythical, etc.)
-        type_ = lines[0].strip()
-
-        # Rename 'Sublegend' to 'Legendary'
-        if type_ == "Sublegend":
-            type_ = "Legendary"
-
-        for line in lines[1:]:
-            if not line or ":" not in line:
+        for idx, category in enumerate(categories):
+            lines = category.strip().split("\n")
+            if not lines:
                 continue
 
-            # Split the line to get the Pokémon's dex number and name
-            number, pokemon_name = line.split(":", 1)
-            pokemon_name = pokemon_name.split("--")[0].strip()  # Remove extra details
+            type_ = lines[0].strip()
+            if type_ == "Sublegend":
+                type_ = "Legendary"
 
-            # Insert into the specials table
-            dex_number = int(number.strip().replace("#", ""))  # Remove '#' and convert to int
-            cursor.execute('''
-                INSERT INTO specials (dex_number, name, type)
-                VALUES (?, ?, ?)
-            ''', (dex_number, pokemon_name, type_))
+            for line in lines[1:]:
+                if not line or ":" not in line:
+                    continue
 
-            row_count += 1
+                dex_number = int(line.split(":")[0].strip().replace("#", ""))
+                name = line.split(":")[1].split("--")[0].strip()
 
-    # Commit the changes and close the connection
-    conn.commit()
-    conn.close()
+                # Check if the Special entry already exists
+                special_pokemon = SpecialsPokemon.query.filter_by(dex_number=dex_number, name=name).first()
 
-    print(f"Specials table updated with {row_count} entries, categorized by type.")
+                if special_pokemon:
+                    count_skipped += 1
+                else:
+                    new_special = SpecialsPokemon(dex_number=dex_number, name=name, type=type_)
+                    db.session.add(new_special)
+                    db.session.commit()
+                    count_inserted += 1
+
+            # Log progress every 1 category
+            print(f"Processed category {idx + 1}/{total_categories}: {type_}")
+
+        # Final output
+        print(f"Finished processing Special Pokémon.")
+        print(f"Total Special Pokémon added: {count_inserted}")
+        print(f"Total Special Pokémon skipped (already exist): {count_skipped}")
 
 if __name__ == "__main__":
-    fetch_and_update_specials()
+    from app import app
+    with app.app_context():
+        fetch_and_update_specials(app.app_context())

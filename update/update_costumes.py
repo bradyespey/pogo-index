@@ -1,119 +1,74 @@
+import os
+import sys
+from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
-import re
-import sqlite3
+import time
 
-# Path to your SQLite database
-db_path = "C:/Projects/GitHub/PoGO/pogo.db"
+# Add the project root directory to the system path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-def sanitize_string(value):
-    """Remove or replace special characters that cause encoding issues."""
-    if value:
-        return value.encode('ascii', 'ignore').decode()  # Remove non-ASCII characters
-    return None
+# Now, you can import app and models after sys.path is correctly set
+from app import app, db
+from models import Costume
 
-def decode_html(html):
-    """Helper function to decode HTML entities like &eacute;."""
-    return (html.replace('&amp;', '&')
-                .replace('&lt;', '<')
-                .replace('&gt;', '>')
-                .replace('&quot;', '"')
-                .replace('&#39;', "'")
-                .replace('&eacute;', 'é')
-                .replace('&uacute;', 'ú')
-                .replace('&Eacute;', 'É')
-                .replace('&Uacute;', 'Ú'))
+def fetch_costume_data(app_context):
+    with app_context:
+        print("Fetching and updating Costume Pokémon data...")
 
-def extract_costume_data(html):
-    """Parse the HTML and extract costume Pokémon data."""
-    soup = BeautifulSoup(html, 'html.parser')
+        url = "https://www.eurogamer.net/pokemon-go-event-costume-pokemon-party-hat-flower-crown-7002"
+        start_time = time.time()
+        print(f"Fetching data from {url}...")
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        print(f"Fetched data in {time.time() - start_time:.2f} seconds")
 
-    # Find all tables that might contain costume Pokémon data
-    tables = soup.find_all('table')
+        # Parse the HTML and extract costume Pokémon data
+        tables = soup.find_all('table')
+        total_costumes = 0
+        costumes_data = []
 
-    # Placeholder list for the parsed data (dex_number, name, costume, first appearance)
-    costumes_data = []
+        for table in tables:
+            rows = table.find_all('tr')[1:]  # Skip the header row
+            total_costumes += len(rows)
+            for row in rows:
+                columns = row.find_all('td')
+                if len(columns) >= 2:
+                    name = columns[0].get_text(strip=True)
+                    first_appearance = columns[1].get_text(strip=True)
+                    costume_type = "Costume" if 'costume' in name.lower() else "Unknown"
+                    costumes_data.append((name, costume_type, first_appearance))
 
-    # Loop through each table (assuming that costume data is within table rows)
-    for table in tables:
-        rows = table.find_all('tr')
-        for row in rows[1:]:  # Skip the first row (header)
-            columns = row.find_all('td')
+        count_inserted, count_updated, count_skipped = 0, 0, 0
 
-            # Ensure the row has enough columns to be valid
-            if len(columns) >= 2:
-                name = decode_html(columns[0].get_text(strip=True))
-                first_appearance = decode_html(columns[1].get_text(strip=True))
+        for idx, (name, costume, first_appearance) in enumerate(costumes_data):
+            # Check if the costume entry already exists in the database
+            existing_costume = Costume.query.filter_by(name=name).first()
 
-                # Using placeholder dex_number since Eurogamer page doesn’t seem to have dex numbers
-                dex_number = None  # You'll need a lookup mechanism to map name -> dex number
+            if existing_costume:
+                if existing_costume.costume != costume or existing_costume.first_appearance != first_appearance:
+                    existing_costume.costume = costume
+                    existing_costume.first_appearance = first_appearance
+                    db.session.commit()
+                    count_updated += 1
+                else:
+                    count_skipped += 1
+            else:
+                new_costume = Costume(name=name, costume=costume, first_appearance=first_appearance)
+                db.session.add(new_costume)
+                db.session.commit()
+                count_inserted += 1
 
-                # Match the name with the costume if possible
-                costume_type = "Unknown"
-                if 'costume' in name.lower():
-                    costume_type = 'Costume'
-                elif 'flower crown' in name.lower():
-                    costume_type = 'Flower Crown'
-                elif 'party hat' in name.lower():
-                    costume_type = 'Party Hat'
+            # Log progress every 10 entries
+            if idx % 10 == 0:
+                print(f"Processing Costume {idx + 1}/{total_costumes}...")
 
-                # Append the parsed data
-                costumes_data.append((dex_number, name, costume_type, first_appearance))
-
-    return costumes_data
-
-def fetch_costume_data():
-    """Fetch Costume Pokémon data and update the SQLite database."""
-    url = "https://www.eurogamer.net/pokemon-go-event-costume-pokemon-party-hat-flower-crown-7002"
-    response = requests.get(url)
-    html = response.text
-
-    # Extract costume data from the HTML
-    costumes_data = extract_costume_data(html)
-
-    # Connect to the SQLite database
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-
-    # Counters for summary output
-    total_pokemon = 0
-    count_inserted = 0
-    count_updated = 0
-
-    # Loop through the extracted costume data and insert/update it in the database
-    for costume_entry in costumes_data:
-        dex_number, name, costume, first_appearance = costume_entry
-        total_pokemon += 1
-
-        # Check if the costume Pokémon entry already exists
-        cursor.execute("SELECT * FROM costumes WHERE name = ?", (name,))
-        existing_entry = cursor.fetchone()
-
-        if existing_entry:
-            # Update the existing entry
-            cursor.execute('''
-                UPDATE costumes
-                SET costume = ?, first_appearance = ?
-                WHERE name = ?
-            ''', (costume, first_appearance, name))
-            count_updated += 1
-        else:
-            # Insert a new entry
-            cursor.execute('''
-                INSERT INTO costumes (dex_number, name, costume, first_appearance)
-                VALUES (?, ?, ?, ?)
-            ''', (dex_number, name, costume, first_appearance))
-            count_inserted += 1
-
-    # Commit the changes and close the connection
-    conn.commit()
-    conn.close()
-
-    # Summary output
-    print(f"Finished fetching and saving Costume Pokémon data.")
-    print(f"Total costume Pokémon processed: {total_pokemon}")
-    print(f"Total costume Pokémon added: {count_inserted}")
-    print(f"Total costume Pokémon updated: {count_updated}")
+        print(f"Finished processing {total_costumes} Costume Pokémon.")
+        print(f"Total Costumes added: {count_inserted}")
+        print(f"Total Costumes updated: {count_updated}")
+        print(f"Total Costumes skipped: {count_skipped}")
 
 if __name__ == "__main__":
-    fetch_costume_data()
+    from app import app
+    with app.app_context():
+        fetch_costume_data(app.app_context())

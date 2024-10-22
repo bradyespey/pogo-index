@@ -74,7 +74,7 @@ class PokeGenieEntry(db.Model):
 class ShinyPokemon(db.Model):
     __tablename__ = 'shinies'
     id = db.Column(db.Integer, primary_key=True)
-    dex_number = db.Column(db.String(10))
+    dex_number = db.Column(db.Integer)
     name = db.Column(db.String(100))
     method = db.Column(db.String(255))
 
@@ -85,9 +85,9 @@ class ShinyPokemon(db.Model):
 class SpecialsPokemon(db.Model):
     __tablename__ = 'specials'
     id = db.Column(db.Integer, primary_key=True)
-    dex_number = db.Column(db.String(10))
+    dex_number = db.Column(db.Integer)
     name = db.Column(db.String(100))
-    type = db.Column(db.String(50))  # 'Legendary', 'Mythical', or 'Ultra Beast'
+    type = db.Column(db.String(50))
 
     def __repr__(self):
         return f"<SpecialsPokemon {self.dex_number} - {self.name} ({self.type})>"
@@ -96,9 +96,10 @@ class SpecialsPokemon(db.Model):
 class Costume(db.Model):
     __tablename__ = 'costumes'
     id = db.Column(db.Integer, primary_key=True)
-    dex_number = db.Column(db.String(10))
+    dex_number = db.Column(db.Integer)
     name = db.Column(db.String(100))
     costume = db.Column(db.String(100))
+    first_appearance = db.Column(db.String(255))
 
     def __repr__(self):
         return f"<Costume {self.dex_number} - {self.name} ({self.costume})>"
@@ -118,7 +119,7 @@ class Form(db.Model):
 class Rocket(db.Model):
     __tablename__ = 'rocket'
     id = db.Column(db.Integer, primary_key=True)
-    dex_number = db.Column(db.String(10))
+    dex_number = db.Column(db.Integer)
     name = db.Column(db.String(100))
     method = db.Column(db.String(255))
 

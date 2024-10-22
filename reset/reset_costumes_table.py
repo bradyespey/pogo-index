@@ -1,39 +1,32 @@
-import sqlite3
+import sys
+from pathlib import Path
 
-# Path to your SQLite database
-db_path = "C:/Projects/GitHub/PoGO/pogo.db"
+# Add the root directory to sys.path
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-def drop_table():
-    """Drop the 'costumes' table if it exists."""
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute("DROP TABLE IF EXISTS costumes;")
-    conn.commit()
-    conn.close()
-    print("Table 'costumes' dropped.")
+# Now we import app and db inside the functions to avoid any circular import issues
+def drop_costumes_table():
+    """Drop the 'costumes' table from the PostgreSQL database."""
+    from app import app, db  # Import app and db locally
+    with app.app_context():
+        db.drop_all()  # Drop all tables including 'costumes'
+        db.session.commit()
+        print("Dropped all tables.")
 
-def create_table():
-    """Create the 'costumes' table."""
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-
-    cursor.execute('''
-        CREATE TABLE costumes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            dex_number INTEGER,
-            name TEXT NOT NULL,
-            costume TEXT,
-            first_appearance TEXT
-        );
-    ''')
-
-    conn.commit()
-    conn.close()
-    print("Table 'costumes' created.")
+def recreate_costumes_table():
+    """Recreate the 'costumes' table using SQLAlchemy."""
+    from app import app, db  # Import app and db locally
+    with app.app_context():
+        db.create_all()  # Recreate all tables, including the updated 'costumes' table
+        db.session.commit()
+        print("Recreated all tables.")
 
 def main():
-    drop_table()
-    create_table()
+    # Drop the existing 'costumes' table
+    drop_costumes_table()
+
+    # Recreate the 'costumes' table with the new fields
+    recreate_costumes_table()
 
 if __name__ == "__main__":
     main()
