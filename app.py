@@ -14,9 +14,14 @@ load_dotenv()
 # Initialize Flask app
 app = Flask(__name__, static_url_path='/pogo/static')
 
+# Add secret key for session protection (important for OAuth)
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fallback-secret-key')  # Replace with a secure key in production
+
 # Configure PostgreSQL database (handling deprecated 'postgres://' URLs)
-uri = os.getenv("DATABASE_URL")  # Get the database URL from the environment
-if uri and uri.startswith("postgres://"):
+uri = os.getenv("DATABASE_URL")
+if not uri:
+    raise ValueError("DATABASE_URL is not set in environment variables")
+if uri.startswith("postgres://"):
     uri = uri.replace("postgres://", "postgresql://", 1)
 app.config['SQLALCHEMY_DATABASE_URI'] = uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -40,6 +45,10 @@ google = oauth.register(
     client_kwargs={'scope': 'openid profile email'}
 )
 
+# Ensure that OAuth environment variables are set
+if not os.getenv('GOOGLE_CLIENT_ID') or not os.getenv('GOOGLE_CLIENT_SECRET'):
+    raise ValueError("Google OAuth credentials are not set in environment variables")
+
 # Initialize application routes
 init_routes(app, google)
 
@@ -48,5 +57,5 @@ if __name__ == '__main__':
     app.run(
         host='0.0.0.0',
         port=int(os.getenv("PORT", 5002)),  # Use PORT from environment for Heroku, default to 5002 locally
-        debug=True
+        debug=os.getenv('DEBUG', 'True').lower() == 'true'  # Toggle debug mode based on environment variable
     )
