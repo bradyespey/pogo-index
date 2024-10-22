@@ -1,4 +1,5 @@
 import os
+import re
 import json
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -14,9 +15,11 @@ load_dotenv()
 app = Flask(__name__, static_url_path='/pogo/static')
 
 # Configure PostgreSQL database
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.secret_key = os.urandom(24)
+uri = os.getenv("DATABASE_URL")  # Get the database URL from the environment
+if uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = uri
 
 # Initialize the database
 db.init_app(app)
