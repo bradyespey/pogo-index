@@ -5,20 +5,27 @@ from flask_sqlalchemy import SQLAlchemy
 from authlib.integrations.flask_client import OAuth
 from models import db
 from routes import init_routes
+from flask_migrate import Migrate
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__, static_url_path='/pogo/static')
 
-# Configure the SQLite database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///C:/Projects/GitHub/PoGO/pogo.db?timeout=20'
+# Configure PostgreSQL database
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = os.urandom(24)
 
 # Initialize the database
 db.init_app(app)
 
+# Migrate the database
+migrate = Migrate(app, db)
+
 # Load API credentials for OAuth
-with open('C:/Projects/GitHub/PoGO/static/api_credentials.json') as f:
+with open('/Users/bradyespey/Projects/GitHub/PoGO/static/api_credentials.json') as f:
     credentials = json.load(f)
 
 # OAuth configuration
