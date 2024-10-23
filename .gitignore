@@ -11,6 +11,7 @@ logs/
 
 # Environment variables
 .env
+.envrc
 
 # API credentials
 api_credentials.json
