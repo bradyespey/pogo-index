@@ -1,0 +1,130 @@
+<!-- templates/info.html -->
+
+{% extends "base.html" %}
+
+{% block title %}Pokémon Go Index - Info{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h2 class="mt-4">Welcome to Pokémon Go Index</h2>
+    <p>Index for tracking Pokémon data. Use the tabs above to navigate through different categories of Pokémon data.</p>
+</div>
+
+<!-- Counts Section -->
+<div class="container my-5">
+    <div class="row">
+        <!-- Shiny Pokémon -->
+        <div class="col-md-4 col-sm-6 mb-4">
+            <div class="card text-white bg-warning h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Shiny Pokémon</h5>
+                    <p class="card-text display-4">{{ shiny_count }}</p>
+                </div>
+            </div>
+        </div>
+        <!-- Costume Pokémon -->
+        <div class="col-md-4 col-sm-6 mb-4">
+            <div class="card text-white bg-primary h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Costume Pokémon</h5>
+                    <p class="card-text display-4">{{ costume_count }}</p>
+                </div>
+            </div>
+        </div>
+        <!-- Shiny Costume Pokémon -->
+        <div class="col-md-4 col-sm-6 mb-4">
+            <div class="card text-white bg-success h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Shiny Costume Pokémon</h5>
+                    <p class="card-text display-4">{{ shiny_costume_count }}</p>
+                </div>
+            </div>
+        </div>
+        <!-- iPad Need -->
+        <div class="col-md-4 col-sm-6 mb-4">
+            <div class="card text-white bg-danger h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">iPad Need</h5>
+                    <p class="card-text display-4">{{ ipad_need_count }}</p>
+                </div>
+            </div>
+        </div>
+        <!-- Extras -->
+        <div class="col-md-4 col-sm-6 mb-4">
+            <div class="card text-white bg-secondary h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Extras</h5>
+                    <p class="card-text display-4">{{ extras_count }}</p>
+                </div>
+            </div>
+        </div>
+        <!-- Lucky Pokémon -->
+        <div class="col-md-4 col-sm-6 mb-4">
+            <div class="card text-white bg-info h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Lucky Pokémon</h5>
+                    <p class="card-text display-4">{{ lucky_count }}</p>
+                </div>
+            </div>
+        </div>
+        <!-- Shadow Pokémon -->
+        <div class="col-md-4 col-sm-6 mb-4">
+            <div class="card text-white bg-dark h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Shadow Pokémon</h5>
+                    <p class="card-text display-4">{{ shadow_count }}</p>
+                </div>
+            </div>
+        </div>
+        <!-- Purified Pokémon -->
+        <div class="col-md-4 col-sm-6 mb-4">
+            <div class="card text-dark bg-light h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Purified Pokémon</h5>
+                    <p class="card-text display-4">{{ purified_count }}</p>
+                </div>
+            </div>
+        </div>
+        <!-- Remaining Living Dex -->
+        <div class="col-md-4 col-sm-6 mb-4">
+            <div class="card text-white bg-danger h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Remaining Living Dex</h5>
+                    <p class="card-text display-4">{{ remaining_living_dex_count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Descriptions Section -->
+<div class="descriptions">
+    <h3>Page Descriptions</h3>
+    <ul class="list-unstyled">
+        <li class="mb-3">
+            <strong>Pokémon GO</strong> - List of all Pokémon pulled from <a href="https://pokemondb.net/go/pokedex" target="_blank">Pokémon Database</a> with lookups to your data in Poke Genie about Have Living Dex, Have Shiny, and shiny availability in Pokémon Go taken from <a href="https://www.serebii.net/pokemongo/shiny.shtml" target="_blank">Serebii</a>, and Need on iPad account.
+        </li>
+        <li class="mb-3">
+            <strong>Shinies</strong> - Available shiny Pokémon in Pokémon Go and their spawn method taken from <a href="https://www.serebii.net/pokemongo/shiny.shtml" target="_blank">Serebii</a>.
+        </li>
+        <li class="mb-3">
+            <strong>Costumes</strong> - Available costume Pokémon in Pokémon Go and their costume type, taken from <a href="https://pokemongo.fandom.com/wiki/Event_Pok%C3%A9mon#Regular_(232_of_239)" target="_blank">Pokémon GO Fandom</a>.
+        </li>        
+        <li class="mb-3">
+            <strong>Forms</strong> - (Not Updated) - Available special form Pokémon like Flabébé, Spinda, Furfrou, etc., taken from <a href="https://pokemongo.fandom.com/wiki/List_of_Pok%C3%A9mon_with_different_forms" target="_blank">Pokémon GO Wiki</a>.
+        </li>
+        <li class="mb-3">
+            <strong>Rocket</strong> - Available Team Rocket shadow and purified Pokémon in Pokémon Go and their spawn method taken from <a href="https://www.serebii.net/pokemongo/shadowpokemon.shtml" target="_blank">Serebii</a>.
+        </li>
+        <li class="mb-3">
+            <strong>All Pokémon</strong> - All Pokémon released across all games, with lookups for which ones are in Pokémon GO, taken from <a href="https://en.wikipedia.org/wiki/List_of_Pok%C3%A9mon" target="_blank">Wikipedia</a>.
+        </li>
+        <li class="mb-3">
+            <strong>Poke Genie</strong> - Important columns taken from the Poke Genie CSV, updated when you manually export it from the Poke Genie app. Those columns are: Name, Form, Pokémon Number, Gender, CP, Quick Move, Charge Move, Charge Move 2, Scan Date, Original Scan Date, Catch Date, Lucky, Shadow/Purified, Favorite, Name (G), Name (U), Name (L).
+        </li>
+        <li class="mb-3">
+            <strong>Notes</strong> - View edited notes for Pokémon on the Pokémon page.
+        </li>
+    </ul>
+</div>
+{% endblock %}

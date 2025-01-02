@@ -1,0 +1,149 @@
+<!-- templates/costumes.html -->
+
+{% extends "base.html" %}
+
+{% block title %}Pokémon Go Index - Costumes{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mt-4 text-center">Costumed Pokémon List</h2>
+    <p class="text-center">
+        This page displays all Pokémon with available costumes from
+        <a href="https://pokemongo.fandom.com/wiki/Event_Pok%C3%A9mon#Regular_(232_of_239)" target="_blank">Pokémon GO Fandom</a>.
+    </p>
+
+    <!-- Combined Filters and Buttons Row -->
+    <div class="row mb-3 align-items-center">
+        <!-- Name Filter -->
+        <div class="col-md-3 col-sm-6 mb-2">
+            <label for="searchName" class="form-label">Name:</label>
+            <input type="text" id="searchName" class="form-control" placeholder="Search Name">
+        </div>
+
+        <!-- Costume Filter -->
+        <div class="col-md-3 col-sm-6 mb-2">
+            <label for="searchCostume" class="form-label">Costume:</label>
+            <input type="text" id="searchCostume" class="form-control" placeholder="Search Costume">
+        </div>
+
+        <!-- Show entries selector -->
+        <div class="col-md-2 col-sm-6 mb-2">
+            <label for="showEntries" class="form-label">Show entries:</label>
+            <select id="showEntries" class="form-control">
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="-1">-All-</option>
+            </select>
+        </div>
+
+        <!-- Save Changes and Reset All Buttons -->
+        <div class="col-md-4 d-flex justify-content-end">
+            {% if 'user' in session %}
+            <button id="saveAllChangesButton" class="btn btn-success btn-lg me-2">Save Changes</button>
+            {% endif %}
+            <button id="resetFiltersButton" class="btn btn-warning btn-lg">Reset All</button>
+        </div>
+    </div>
+
+    <!-- Table for Costumed Pokémon List -->
+    <div class="table-responsive">
+        <table id="costumesTable" class="table dataTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Costume</th>
+                    <th>Image</th>
+                    <th>
+                        <div>Brady 👤<span style="font-size: 0.8em; color: gray;">(Select All)</span></div>
+                        <input type="checkbox" id="selectAllBradyOwn">
+                    </th>
+                    <th>
+                        <div>Matt 👤<span style="font-size: 0.8em; color: gray;">(Select All)</span></div>
+                        <input type="checkbox" id="selectAllMattOwn">
+                    </th>
+                    <th>Shiny</th>
+                    <th>
+                        <div>Brady ✨<span style="font-size: 0.8em; color: gray;">(Select All)</span></div>
+                        <input type="checkbox" id="selectAllBradyShiny">
+                    </th>
+                    <th>
+                        <div>Matt ✨<span style="font-size: 0.8em; color: gray;">(Select All)</span></div>
+                        <input type="checkbox" id="selectAllMattShiny">
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for costume in costumes_data %}
+                <tr>
+                    <td>{{ costume.dex_number }}</td>
+                    <td>{{ costume.name }}</td>
+                    <td>{{ costume.costume }}</td>
+
+                    <!-- Display Image -->
+                    <td data-search="{{ 'Has Image' if costume.image_url else 'No Image' }}">
+                        {% if costume.image_url %}
+                            <img src="{{ costume.image_url }}" alt="Image of {{ costume.name }}" style="width: 50px; height: auto;">
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+
+                    <!-- Brady Own Checkbox -->
+                    <td data-filter="{{ 'Yes' if costume.brady_own == 'Yes' else 'No' }}">
+                        {% if 'user' in session %}
+                            <input type="checkbox" class="brady-own-checkbox" data-costume-id="{{ costume.id }}" {% if costume.brady_own == 'Yes' %}checked{% endif %}>
+                        {% else %}
+                            {{ costume.brady_own }}
+                        {% endif %}
+                    </td>
+
+                    <!-- Matt Own Checkbox -->
+                    <td data-filter="{{ 'Yes' if costume.matt_own == 'Yes' else 'No' }}">
+                        {% if 'user' in session %}
+                            <input type="checkbox" class="matt-own-checkbox" data-costume-id="{{ costume.id }}" {% if costume.matt_own == 'Yes' %}checked{% endif %}>
+                        {% else %}
+                            {{ costume.matt_own }}
+                        {% endif %}
+                    </td>
+
+                    <!-- Display Shiny Image -->
+                    <td data-search="{{ 'Has Image' if costume.shiny_image_url else 'No Image' }}">
+                        {% if costume.shiny_image_url %}
+                            <img src="{{ costume.shiny_image_url }}" alt="Shiny image of {{ costume.name }}" style="width: 50px; height: auto;">
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+
+                    <!-- Brady Shiny Checkbox -->
+                    <td data-filter="{{ 'Yes' if costume.brady_shiny == 'Yes' else 'No' }}">
+                        {% if 'user' in session %}
+                            <input type="checkbox" class="brady-shiny-checkbox" data-costume-id="{{ costume.id }}" {% if costume.brady_shiny == 'Yes' %}checked{% endif %}>
+                        {% else %}
+                            {{ costume.brady_shiny }}
+                        {% endif %}
+                    </td>
+
+                    <!-- Matt Shiny Checkbox -->
+                    <td data-filter="{{ 'Yes' if costume.matt_shiny == 'Yes' else 'No' }}">
+                        {% if 'user' in session %}
+                            <input type="checkbox" class="matt-shiny-checkbox" data-costume-id="{{ costume.id }}" {% if costume.matt_shiny == 'Yes' %}checked{% endif %}>
+                        {% else %}
+                            {{ costume.matt_shiny }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/costumes.js') }}"></script>
+{% endblock %}

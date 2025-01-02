@@ -1,0 +1,84 @@
+<!-- templates/forms.html -->
+
+{% extends "base.html" %}
+
+{% block title %}Pokémon Go Index - Forms{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mt-4 text-center">Special Forms Pokémon List</h2>
+    <p class="text-center">
+        This page displays all released Pokémon with different forms from
+        <a href="https://pokemongo.fandom.com/wiki/List_of_Pok%C3%A9mon_with_different_forms" target="_blank">Pokémon GO Wiki | Fandom</a>.
+    </p>
+
+    <!-- Combined filter row with "Show entries" and "Reset All" button in one row -->
+    <div class="row mb-3 align-items-center">
+        <!-- Name Search -->
+        <div class="col-md-3">
+            <label for="searchName">Name:</label>
+            <input type="text" id="searchName" class="form-control" placeholder="Search Name">
+        </div>
+
+        <!-- Form Search -->
+        <div class="col-md-3">
+            <label for="searchForm">Form:</label>
+            <input type="text" id="searchForm" class="form-control" placeholder="Search Form">
+        </div>
+
+        <!-- Available Filter -->
+        <div class="col-md-3">
+            <label for="filterAvailable">Available:</label>
+            <select id="filterAvailable" class="form-control">
+                <option value="">All</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
+        </div>
+
+        <!-- Show entries selector and Reset All button -->
+        <div class="col-md-3 d-flex align-items-end">
+            <div class="input-group">
+                <label for="showEntries" class="mr-2">Show entries:</label>
+                <select id="showEntries" class="form-control">
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="-1">-All-</option>
+                </select>
+                <button id="resetFiltersButton" class="btn btn-warning ml-2">Reset All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table for Special Forms Pokémon -->
+    <div class="table-responsive">
+        <table id="formsTable" class="table dataTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Form</th>
+                    <th>Available</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in forms_data %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ form.name }}</td>
+                    <td>{{ form.form }}</td>
+                    <td>{{ 'Yes' if form.available else 'No' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/forms.js') }}"></script>
+{% endblock %}

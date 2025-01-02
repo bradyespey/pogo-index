@@ -1,0 +1,71 @@
+<!-- templates/notes.html -->
+
+{% extends "base.html" %}
+
+{% block title %}Pokémon Go Index - Notes{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mt-4 text-center">Notes Data</h2>
+    <p class="text-center">This page allows you to view and search through Pokémon notes.</p>
+
+    <!-- Combined filter row with "Show entries" and "Reset All" button in one row -->
+    <div class="row mb-3 align-items-center">
+        <!-- Name Search -->
+        <div class="col-md-3">
+            <label for="searchName">Name:</label>
+            <input type="text" id="searchName" class="form-control" placeholder="Search Name">
+        </div>
+
+        <!-- Note Search -->
+        <div class="col-md-3">
+            <label for="searchNote">Note:</label>
+            <input type="text" id="searchNote" class="form-control" placeholder="Search Note">
+        </div>
+
+        <!-- Show entries selector and Reset All button -->
+        <div class="col-md-4 d-flex align-items-end">
+            <div class="input-group">
+                <label for="showEntries" class="mr-2">Show entries:</label>
+                <select id="showEntries" class="form-control">
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="-1">-All-</option>
+                </select>
+                <button id="resetFiltersButton" class="btn btn-warning ml-2">Reset All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table for Notes -->
+    <div class="table-responsive">
+        <table id="notesTable" class="table dataTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for note, pokemon_name in notes_data %}
+                    {% if note.note_text.strip() %}
+                    <tr>
+                        <td>{{ note.pokemon_id }}</td>
+                        <td>{{ pokemon_name }}</td>
+                        <td>{{ note.note_text }}</td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/notes.js') }}"></script>
+{% endblock %}

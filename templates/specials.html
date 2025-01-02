@@ -1,0 +1,78 @@
+<!-- templates/specials.html -->
+
+{% extends "base.html" %}
+
+{% block title %}Pokémon Go Index - Specials{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mt-4 text-center">Special Pokémon List</h2>
+    <p class="text-center">
+        This page automatically updates with the latest data for special Pokémon like Legendary, Mythical, Ultra Beasts, and Paradox from
+        <a href="https://gist.githubusercontent.com/Lusamine/a8604135b89dcfa840c61900c43df569/raw/7cdd446d7d13c9ea8cd385d630b29ceb550a1009/SV%25203.0.1%2520Legendary,%2520Mythical,%2520Sublegendary,%2520Ultra%2520Beast,%2520Paradox%2520Lists" target="_blank">GitHub</a>.
+    </p>
+
+    <!-- Filter row above the table -->
+    <div class="row mb-3 align-items-center">
+        <!-- Name Search -->
+        <div class="col-md-3">
+            <label for="searchName">Name:</label>
+            <input type="text" id="searchName" class="form-control" placeholder="Search Name">
+        </div>
+
+        <!-- Type Filter -->
+        <div class="col-md-3">
+            <label for="filterType">Type:</label>
+            <select id="filterType" class="form-control">
+                <option value="">All</option>
+                <option value="Legendary">Legendary</option>
+                <option value="Mythical">Mythical</option>
+                <option value="Ultra Beast">Ultra Beast</option>
+                <option value="Paradox">Paradox</option>
+            </select>
+        </div>
+
+        <!-- Show entries selector and Reset All button -->
+        <div class="col-md-4 d-flex align-items-end">
+            <div class="input-group">
+                <label for="showEntries" class="mr-2">Show entries:</label>
+                <select id="showEntries" class="form-control">
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="-1">-All-</option>
+                </select>
+                <button id="resetFiltersButton" class="btn btn-warning ml-2">Reset All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table for Special Pokémon -->
+    <div class="table-responsive">
+        <table id="specialsTable" class="table dataTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for special in specials_data %}
+                <tr>
+                    <td>{{ special.id }}</td>
+                    <td>{{ special.name }}</td>
+                    <td>{{ special.type }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/specials.js') }}"></script>
+{% endblock %}

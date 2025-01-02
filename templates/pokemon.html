@@ -1,0 +1,287 @@
+<!-- templates/pokemon.html -->
+
+{% extends "base.html" %}
+
+{% block title %}Pokémon Go Index - Pokémon{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mt-4 text-center">Pokémon List</h2>
+    <p class="text-center">
+        This page updates with all Pokémon from
+        <a href="https://pokemondb.net/go/pokedex" target="_blank">Pokémon DB</a>.
+    </p>
+
+    <!-- Custom Filters and Buttons Row -->
+    <div class="row mb-3 align-items-end custom-filters">
+        <!-- 1. Category Filter -->
+        <div class="filter-group col-md-2 col-sm-6 mb-2">
+            <label for="filterCategory" class="form-label">Category:</label>
+            <select id="filterCategory" class="form-control">
+                <option value="">All</option>
+                {% for category in categories %}
+                    <option value="{{ category }}">{{ category }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- 2. Generation Filter -->
+        <div class="filter-group col-md-2 col-sm-6 mb-2">
+            <label for="filterGeneration" class="form-label">Generation:</label>
+            <select id="filterGeneration" class="form-control">
+                <option value="">All</option>
+                {% for generation in generations %}
+                    <option value="{{ generation }}">{{ generation }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- 3. Type Filter -->
+        <div class="filter-group col-md-2 col-sm-6 mb-2">
+            <label for="filterType" class="form-label">Type:</label>
+            <select id="filterType" class="form-control">
+                <option value="">All</option>
+                {% for type in types %}
+                    <option value="{{ type }}">{{ type }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- 4. Shiny Released Filter -->
+        <div class="filter-group col-md-2 col-sm-6 mb-2">
+            <label for="filterShiny" class="form-label">Shiny Released:</label>
+            <select id="filterShiny" class="form-control">
+                <option value="">All</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
+        </div>
+
+        <!-- 5. Show Entries Selector -->
+        <div class="filter-group col-md-2 col-sm-6 mb-2">
+            <label for="showEntries" class="form-label">Show entries:</label>
+            <select id="showEntries" class="form-control">
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="-1">-All-</option>
+            </select>
+        </div>
+
+        <!-- 6. Save Changes and Reset All Buttons -->
+        <div class="btn-group col-md-2 col-sm-6 mb-2 text-end">
+            {% if 'user' in session %}
+            <button id="saveAllChangesButton" class="btn btn-success">Save Changes</button>
+            {% endif %}
+            <button id="resetFiltersButton" class="btn btn-warning">Reset All</button>
+        </div>
+    </div>
+    
+    <!-- Table for Pokémon List -->
+    <div class="table-responsive">
+        <table id="pokemonTable" class="table dataTable">
+            <thead>
+                <!-- Header Row: Column Titles, Sorting -->
+                <tr>
+                    <th>#</th>
+                    <th class="image-column"><i class="fas fa-camera"></i></th>
+                    <th>Name</th>
+                    <th>Shiny ✨</th>
+                    <th>Brady 👤</th>
+                    <th>Brady ✨</th>
+                    <th>Brady 🎲</th>
+                    <th>Matt 👤</th>
+                    <th>Matt ✨</th>
+                    <th>Matt 🎲</th>
+                    <th>iPad 👤</th>
+                    <th>iPad ✨</th>
+                    <th>iPad 🎲</th>
+                    <th>Notes</th>
+                    <!-- Hidden columns for filters -->
+                    <th style="display: none;">Category</th>
+                    <th style="display: none;">Generation</th>
+                    <th style="display: none;">Type</th>
+                </tr>
+                <!-- Filter Row -->
+                <tr id="filterRow">
+                    <th><input type="number" placeholder="#" class="form-control form-control-sm"></th>
+                    <th></th>
+                    <th><input type="text" placeholder="Name" class="form-control form-control-sm"></th>
+                    <th>
+                        <select class="form-control form-control-sm">
+                            <option value="">All</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </th>
+                    <th>
+                        <select class="form-control form-control-sm">
+                            <option value="">All</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </th>
+                    <th>
+                        <select class="form-control form-control-sm">
+                            <option value="">All</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </th>
+                    <th>
+                        <select class="form-control form-control-sm">
+                            <option value="">All</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </th>
+                    <!-- Filters for Checkbox Columns -->
+                    <th>
+                        <select class="form-control form-control-sm">
+                            <option value="">All</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </th>
+                    <th>
+                        <select class="form-control form-control-sm">
+                            <option value="">All</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </th>
+                    <th>
+                        <select class="form-control form-control-sm">
+                            <option value="">All</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </th>
+                    <!-- iPad 👤 -->
+                    <th>
+                        <select class="form-control form-control-sm">
+                            <option value="">All</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </th>
+                    <!-- iPad ✨ -->
+                    <th>
+                        <select class="form-control form-control-sm">
+                            <option value="">All</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </th>
+                    <!-- iPad 🎲 -->
+                    <th>
+                        <select class="form-control form-control-sm">
+                            <option value="">All</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </th>
+                    <!-- Notes Filter -->
+                    <th>
+                        <select class="form-control form-control-sm">
+                            <option value="">All</option>
+                            <option value="Has Notes">Has Notes</option>
+                            <option value="No Notes">No Notes</option>
+                        </select>
+                    </th>
+                    <!-- Hidden columns for filters -->
+                    <th style="display: none;"></th>
+                    <th style="display: none;"></th>
+                    <th style="display: none;"></th>
+                </tr>
+            </thead>            
+            <tbody>
+                {% for pokemon in pokemon_list %}
+                <tr>
+                    <td>{{ pokemon.dex_number }}</td>
+                    <td class="image-column">
+                        {% if pokemon.image_url %}
+                            <img src="{{ pokemon.image_url }}" alt="{{ pokemon.name }}" width="50" height="50" loading="lazy">
+                        {% else %}
+                            <span>N/A</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ pokemon.name }}</td>
+                    <td>{{ pokemon.shiny_released }}</td>
+                    <td>{{ pokemon.brady_living_dex }}</td>
+                    <td>{{ pokemon.brady_shiny_dex }}</td>
+                    <td>{{ pokemon.brady_lucky_dex }}</td>
+
+                    <!-- Matt Living Dex Checkbox -->
+                    <td data-filter="{{ pokemon.matt_have }}">
+                        {% if 'user' in session %}
+                            <input type="checkbox" class="matt-have-checkbox" data-pokemon-id="{{ pokemon.id }}" {% if pokemon.matt_have == 'Yes' %}checked{% endif %}>
+                        {% else %}
+                            {{ pokemon.matt_have }}
+                        {% endif %}
+                    </td>
+
+                    <!-- Matt Shiny Checkbox -->
+                    <td data-filter="{{ pokemon.matt_shiny }}">
+                        {% if 'user' in session %}
+                            <input type="checkbox" class="matt-shiny-checkbox" data-pokemon-id="{{ pokemon.id }}" {% if pokemon.matt_shiny == 'Yes' %}checked{% endif %}>
+                        {% else %}
+                            {{ pokemon.matt_shiny }}
+                        {% endif %}
+                    </td>
+
+                    <!-- Matt Lucky Checkbox -->
+                    <td data-filter="{{ pokemon.matt_lucky }}">
+                        {% if 'user' in session %}
+                            <input type="checkbox" class="matt-lucky-checkbox" data-pokemon-id="{{ pokemon.id }}" {% if pokemon.matt_lucky == 'Yes' %}checked{% endif %}>
+                        {% else %}
+                            {{ pokemon.matt_lucky }}
+                        {% endif %}
+                    </td>
+
+                    <td>{{ pokemon.need_on_ipad }}</td>
+
+                    <!-- iPad Shiny Checkbox -->
+                    <td data-filter="{{ pokemon.ipad_shiny_dex }}">
+                        {% if 'user' in session %}
+                            <input type="checkbox" class="ipad-shiny-checkbox" data-pokemon-id="{{ pokemon.id }}" {% if pokemon.ipad_shiny_dex == 'Yes' %}checked{% endif %}>
+                        {% else %}
+                            {{ pokemon.ipad_shiny_dex }}
+                        {% endif %}
+                    </td>
+
+                    <!-- iPad Lucky Checkbox -->
+                    <td data-filter="{{ pokemon.ipad_lucky_dex }}">
+                        {% if 'user' in session %}
+                            <input type="checkbox" class="ipad-lucky-checkbox" data-pokemon-id="{{ pokemon.id }}" {% if pokemon.ipad_lucky_dex == 'Yes' %}checked{% endif %}>
+                        {% else %}
+                            {{ pokemon.ipad_lucky_dex }}
+                        {% endif %}
+                    </td>
+
+                    <!-- Notes -->
+                    <td>
+                        {% if 'user' in session %}
+                            <textarea class="note-edit form-control" data-pokemon-id="{{ pokemon.id }}">{{ pokemon.notes }}</textarea>
+                        {% else %}
+                            {{ pokemon.notes }}
+                        {% endif %}
+                    </td>
+
+                    <!-- Hidden columns for filters -->
+                    <td style="display: none;">{{ pokemon.category }}</td>
+                    <td style="display: none;">{{ pokemon.generation }}</td>
+                    <td style="display: none;">{{ pokemon.type }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/pokemon.js') }}"></script>
+{% endblock %}
