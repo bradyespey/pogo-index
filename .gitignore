@@ -56,3 +56,5 @@ env/
 
 # Other files
 other/
+old/
+logs/
