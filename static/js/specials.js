@@ -1,6 +1,5 @@
 //static/js/specials.js
 
-
 $(document).ready(function () {
     // === DATA TABLE INITIALIZATION AND FILTERING ===
 
