@@ -1,4 +1,5 @@
-// static/js/notes.js
+//static/js/notes.js
+
 
 $(document).ready(function () {
     // === DATA TABLE INITIALIZATION AND FILTERING ===

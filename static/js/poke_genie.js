@@ -1,4 +1,5 @@
-// static/js/poke_genie.js
+//static/js/poke_genie.js
+
 
 $(document).ready(function () {
     // === DATA TABLE INITIALIZATION AND FILTERING ===

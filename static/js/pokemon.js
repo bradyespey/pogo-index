@@ -1,4 +1,5 @@
-// static/js/pokemon.js
+//static/js/pokemon.js
+
 
 $(document).ready(function () {
     let hasChanges = false; // Track if changes were made

@@ -1,4 +1,5 @@
-// static/js/forms.js
+//static/js/forms.js
+
 
 $(document).ready(function () {
     // === DATA TABLE INITIALIZATION AND FILTERING ===

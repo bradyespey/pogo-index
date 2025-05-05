@@ -1,4 +1,5 @@
-// static/js/base.js
+//static/js/base.js
+
 
 document.addEventListener('DOMContentLoaded', function () {
     const toggle = document.getElementById('darkModeToggle');

@@ -1,4 +1,5 @@
-# scripts/update_cosutmes.py
+# scripts/update_costumes.py
+
 
 import os
 import sys
